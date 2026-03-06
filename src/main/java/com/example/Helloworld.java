@@ -30,10 +30,25 @@ public class Helloworld {
 
     @GetMapping("/")
     public String checkCert() throws Exception {
-        KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(null, null); // Use default
-        // In a real app, you'd check for your specific alias here
-        int certCount = Collections.list(ks.aliases()).size();
-        return "Java 25 active. TrustStore contains " + certCount + " certificates.";
+        int certCount = 0;
+        boolean customCaFound = false;
+        
+        javax.net.ssl.TrustManagerFactory tmf = javax.net.ssl.TrustManagerFactory.getInstance(javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init((java.security.KeyStore) null);
+        
+        for (javax.net.ssl.TrustManager tm : tmf.getTrustManagers()) {
+            if (tm instanceof javax.net.ssl.X509TrustManager) {
+                java.security.cert.X509Certificate[] certs = ((javax.net.ssl.X509TrustManager) tm).getAcceptedIssuers();
+                certCount += certs.length;
+                
+                for (java.security.cert.X509Certificate cert : certs) {
+                    if (cert.getSubjectX500Principal().getName().contains("Demo-CA")) {
+                        customCaFound = true;
+                    }
+                }
+            }
+        }
+        
+        return "Java 25 active. TrustStore contains " + certCount + " certificates. Custom CA (Demo-CA) loaded: " + customCaFound;
     }
 }

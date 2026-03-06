@@ -94,10 +94,13 @@ gcloud storage buckets create $SOURCE_BUCKET \
 ```
 
 ### 5. Create the CA TrustStore Secret
-Convert your custom `.pem` certificate into a Java KeyStore and upload it to Secret Manager:
+To ensure your application still trusts public internet CAs, you should import your custom `.pem` certificate into a copy of the default Java `cacerts` file, then upload it to Secret Manager:
 
 ```bash
-# Create the truststore
+# Copy the default Java cacerts file (this command varies depending on your OS and Java installation)
+cp $(dirname $(readlink -f $(which java)))/../lib/security/cacerts truststore.jks
+
+# Change the default password (changeit) if needed, then import the custom CA
 keytool -import -alias custom-ca -file path/to/custom-ca.pem -keystore truststore.jks -storepass changeit -noprompt
 
 # Create the secret
@@ -119,7 +122,7 @@ Because a CMEK build process requires uploading code to a designated, pre-config
 tar -czvf source.tgz --exclude .git --exclude source.tgz .
 gcloud storage cp source.tgz $SOURCE_BUCKET/
 
-# Deploy with CMEK, Secret Manager Volume Mount, and Automatic Updates
+# Deploy with CMEK, Secret Manager Volume Mount, Automatic Updates, and CPU Boost
 gcloud run deploy helloworld \
   --source $SOURCE_BUCKET/source.tgz \
   --image "$REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/helloworld" \
@@ -130,6 +133,7 @@ gcloud run deploy helloworld \
   --automatic-updates \
   --base-image="$REGION-docker.pkg.dev/serverless-runtimes/google-22/runtimes/java21" \
   --no-allow-unencrypted-build \
+  --cpu-boost \
   --allow-unauthenticated
 ```
 
