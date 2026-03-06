@@ -165,3 +165,9 @@ gcloud run deploy helloworld \
    ```bash
    gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=helloworld AND textPayload:DEBUG" --limit=5 --format="value(textPayload)"
    ```
+
+4. **Verify CPU Boost**:
+   Check the service annotations to confirm that CPU Boost is enabled during startup.
+   ```bash
+   gcloud run services describe helloworld --region $REGION --format="value(spec.template.metadata.annotations['run.googleapis.com/startup-cpu-boost'])"
+   ```
