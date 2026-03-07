@@ -5,7 +5,7 @@ This project demonstrates how to natively build and deploy a Cloud Run service f
 ## Requirements
 1. **Automatic Updates on Base Image**: The deployed service must be configured to automatically apply security patches to the underlying OS/runtime layer without requiring a full code rebuild.
 2. **Customer-Managed Encryption Keys (CMEK)**: The entire deployment process (including the build process, source code upload, build artifacts, and deployed container) must be encrypted using CMEK.
-3. **CA Certificate Support**: Custom CA certificates must be made available to the application securely at runtime. Since Google Cloud Buildpacks do not natively inject CA certificates at build time (unlike Paketo Buildpacks), the most secure, Cloud-native approach is to mount the certificate as a Secret Manager volume directly into the container.
+3. **CA Certificate Support**: Custom CA certificates must be made available to the application securely at runtime. Since Google Cloud Buildpacks do not natively support build-time or runtime CA certificate injection (as documented in [GoogleCloudPlatform/buildpacks Issue #125](https://github.com/GoogleCloudPlatform/buildpacks/issues/125)), the most secure, Cloud-native approach is to mount the certificate as a Secret Manager volume directly into the container.
 
 ## Design Logics
 
